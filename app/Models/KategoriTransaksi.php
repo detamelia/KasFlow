@@ -18,4 +18,30 @@ class KategoriTransaksi extends Model
     {
         return $this->hasMany(Transaksi::class, 'kategori_id');
     }
+
+    public function scopeSearch($query, ?string $term)
+    {
+        if ($term) {
+            return $query->where('nama_kategori', 'like', '%' . $term . '%');
+        }
+        return $query;
+    }
+
+    public function scopeJenis($query, ?string $jenis)
+    {
+        if ($jenis && in_array($jenis, ['pemasukan', 'pengeluaran'])) {
+            return $query->where('jenis', $jenis);
+        }
+        return $query;
+    }
+
+    public function scopePemasukan($query)
+    {
+        return $query->where('jenis', 'pemasukan');
+    }
+
+    public function scopePengeluaran($query)
+    {
+        return $query->where('jenis', 'pengeluaran');
+    }
 }
