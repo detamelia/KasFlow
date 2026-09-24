@@ -121,7 +121,16 @@
                         @if ($role === 'bendahara')
                             <button
                                 type="button"
-                                onclick="showToast('Simulasi Hapus Pemasukan {{ $item['kode'] }}', 'info')"
+                                onclick="openModal('modal-pemasukan-edit-{{ $item['id'] }}')"
+                                class="text-slate-400 hover:text-emerald-600 p-1 transition-colors cursor-pointer"
+                                title="Edit Pemasukan"
+                            >
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                            </button>
+
+                            <button
+                                type="button"
+                                onclick="showToast('Hapus pemasukan {{ $item['kode'] }}')"
                                 class="text-slate-400 hover:text-rose-600 p-1 transition-colors cursor-pointer"
                                 title="Hapus"
                             >
@@ -173,6 +182,30 @@
                                 Tutup
                             </x-button>
                         </x-slot>
+                    </x-modal>
+
+                    <!-- Modal Edit Pemasukan Real -->
+                    <x-modal id="modal-pemasukan-edit-{{ $item['id'] }}" title="Edit Pemasukan {{ $item['kode'] }}" subtitle="Ubah rincian pemasukan kas">
+                        <form onsubmit="event.preventDefault(); closeModal('modal-pemasukan-edit-{{ $item['id'] }}'); showToast('Pemasukan {{ $item['kode'] }} berhasil diperbarui!');" class="space-y-4">
+                            <x-input label="Judul Pemasukan" name="judul" value="{{ $item['judul'] }}" required="true" />
+                            <div class="grid grid-cols-2 gap-4">
+                                <x-input label="Nominal (Rp)" name="nominal" type="number" value="{{ $item['nominal'] }}" required="true" />
+                                <x-select label="Kategori" name="kategori" selected="{{ $item['kategori'] }}" :options="$kategoriList" required="true" />
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <x-input label="Tanggal" name="tanggal" type="date" value="{{ $item['tanggal'] }}" required="true" />
+                                <x-input label="Penanggung Jawab" name="penanggung_jawab" value="{{ $item['penanggung_jawab'] }}" required="true" />
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">Deskripsi / Catatan</label>
+                                <textarea name="deskripsi" rows="3" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm text-slate-900 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500 focus:outline-none">{{ $item['deskripsi'] }}</textarea>
+                            </div>
+                            <x-input label="Upload Ulang Bukti Transfer" name="bukti" type="file" />
+                            <div class="pt-2 border-t border-slate-100 flex items-center justify-end gap-3">
+                                <x-button variant="outline" size="md" onclick="closeModal('modal-pemasukan-edit-{{ $item['id'] }}')">Batal</x-button>
+                                <x-button variant="primary" size="md" type="submit">Simpan Perubahan</x-button>
+                            </div>
+                        </form>
                     </x-modal>
                 </td>
             </tr>

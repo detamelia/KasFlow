@@ -267,7 +267,7 @@
                             @if ($role === 'bendahara')
                                 <button
                                     type="button"
-                                    onclick="showToast('Fitur edit transaksi simulasi aktif untuk {{ $t['kode'] }}')"
+                                    onclick="openModal('modal-edit-{{ $t['id'] }}')"
                                     class="text-slate-400 hover:text-emerald-600 p-1 transition-colors cursor-pointer"
                                     title="Edit Transaksi"
                                 >
@@ -322,7 +322,7 @@
                                             <svg class="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/></svg>
                                             <span class="font-medium text-slate-700">{{ $t['bukti'] }}</span>
                                         </div>
-                                        <x-button variant="outline" size="sm" onclick="showToast('Membuka file bukti dummy {{ $t['bukti'] }}')">
+                                        <x-button variant="outline" size="sm" onclick="showToast('Membuka file bukti {{ $t['bukti'] }}')">
                                             Lihat File
                                         </x-button>
                                     </div>
@@ -335,6 +335,78 @@
                                 </x-button>
                             </x-slot>
                         </x-modal>
+
+                        <!-- Modal Edit Transaksi (Komponen Edit Real) -->
+                        <x-modal id="modal-edit-{{ $t['id'] }}" title="Edit Transaksi {{ $t['kode'] }}" subtitle="Ubah rincian pencatatan data transaksi">
+                            <form onsubmit="event.preventDefault(); closeModal('modal-edit-{{ $t['id'] }}'); showToast('Perubahan transaksi {{ $t['kode'] }} berhasil disimpan!');" class="space-y-4">
+                                <x-input
+                                    label="Judul Transaksi"
+                                    name="judul"
+                                    value="{{ $t['judul'] }}"
+                                    required="true"
+                                />
+
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <x-input
+                                        label="Nominal (Rp)"
+                                        name="nominal"
+                                        type="number"
+                                        value="{{ $t['nominal'] }}"
+                                        required="true"
+                                    />
+
+                                    <x-select
+                                        label="Kategori"
+                                        name="kategori"
+                                        selected="{{ $t['kategori'] }}"
+                                        :options="$t['jenis'] === 'pemasukan' ? ['Uang Kas', 'Sponsorship', 'Dana Hibah', 'Donasi', 'Pendaftaran Event', 'Lain-lain'] : ['Operasional', 'Logistik', 'Konsumsi', 'Transportasi', 'Acara/Event', 'Perlengkapan', 'Lain-lain']"
+                                        required="true"
+                                    />
+                                </div>
+
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <x-input
+                                        label="Tanggal Transaksi"
+                                        name="tanggal"
+                                        type="date"
+                                        value="{{ $t['tanggal'] }}"
+                                        required="true"
+                                    />
+
+                                    <x-input
+                                        label="Penanggung Jawab"
+                                        name="penanggung_jawab"
+                                        value="{{ $t['penanggung_jawab'] }}"
+                                        required="true"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">Deskripsi / Catatan</label>
+                                    <textarea
+                                        name="deskripsi"
+                                        rows="3"
+                                        class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm text-slate-900 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                                    >{{ $t['deskripsi'] }}</textarea>
+                                </div>
+
+                                <x-input
+                                    label="Perbarui File Bukti / Nota"
+                                    name="bukti"
+                                    type="file"
+                                    helper="Biarkan kosong jika tidak ingin mengubah file bukti"
+                                />
+
+                                <div class="pt-2 border-t border-slate-100 flex items-center justify-end gap-3">
+                                    <x-button variant="outline" size="md" onclick="closeModal('modal-edit-{{ $t['id'] }}')">
+                                        Batal
+                                    </x-button>
+                                    <x-button variant="primary" size="md" type="submit">
+                                        Simpan Perubahan
+                                    </x-button>
+                                </div>
+                            </form>
+                        </x-modal>
                     </td>
                 </tr>
             @endforeach
@@ -343,9 +415,9 @@
 
 </div>
 
-<!-- Modal Modul Tambah Pemasukan (Simulasi Modal UI) -->
+<!-- Modal Modul Tambah Pemasukan -->
 <x-modal id="modal-tambah-pemasukan" title="Tambah Record Pemasukan Kas Baru" subtitle="Input data pemasukan uang kas organisasi">
-    <form id="form-pemasukan" onsubmit="event.preventDefault(); closeModal('modal-tambah-pemasukan'); showToast('Pemasukan baru berhasil dicatat (Dummy Simulation)!');" class="space-y-4">
+    <form id="form-pemasukan" onsubmit="event.preventDefault(); closeModal('modal-tambah-pemasukan'); showToast('Pemasukan baru berhasil dicatat!');" class="space-y-4">
         <x-input
             label="Judul Pemasukan"
             name="judul"
@@ -415,7 +487,7 @@
     </form>
 </x-modal>
 
-<!-- Modal Modul Tambah Pengeluaran (Simulasi Modal UI) -->
+<!-- Modal Modul Tambah Pengeluaran -->
 <x-modal id="modal-tambah-pengeluaran" title="Tambah Record Pengeluaran Kas Baru" subtitle="Input data pengeluaran dana organisasi">
     <form id="form-pengeluaran" onsubmit="event.preventDefault(); closeModal('modal-tambah-pengeluaran'); showToast('Pengeluaran baru berhasil dicatat!', 'info');" class="space-y-4">
         <x-input

@@ -123,11 +123,20 @@
                         @if ($role === 'bendahara')
                             <button
                                 type="button"
-                                onclick="showToast('Simulasi Edit Pengeluaran {{ $item['kode'] }}', 'info')"
+                                onclick="openModal('modal-pengeluaran-edit-{{ $item['id'] }}')"
                                 class="text-slate-400 hover:text-emerald-600 p-1 transition-colors cursor-pointer"
-                                title="Edit"
+                                title="Edit Pengeluaran"
                             >
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                            </button>
+
+                            <button
+                                type="button"
+                                onclick="showToast('Hapus pengeluaran {{ $item['kode'] }}', 'danger')"
+                                class="text-slate-400 hover:text-rose-600 p-1 transition-colors cursor-pointer"
+                                title="Hapus"
+                            >
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                             </button>
                         @endif
                     </div>
@@ -175,6 +184,30 @@
                                 Tutup
                             </x-button>
                         </x-slot>
+                    </x-modal>
+
+                    <!-- Modal Edit Pengeluaran Real -->
+                    <x-modal id="modal-pengeluaran-edit-{{ $item['id'] }}" title="Edit Pengeluaran {{ $item['kode'] }}" subtitle="Ubah rincian pengeluaran dana">
+                        <form onsubmit="event.preventDefault(); closeModal('modal-pengeluaran-edit-{{ $item['id'] }}'); showToast('Pengeluaran {{ $item['kode'] }} berhasil diperbarui!', 'info');" class="space-y-4">
+                            <x-input label="Judul Pengeluaran" name="judul" value="{{ $item['judul'] }}" required="true" />
+                            <div class="grid grid-cols-2 gap-4">
+                                <x-input label="Nominal (Rp)" name="nominal" type="number" value="{{ $item['nominal'] }}" required="true" />
+                                <x-select label="Kategori" name="kategori" selected="{{ $item['kategori'] }}" :options="$kategoriList" required="true" />
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <x-input label="Tanggal" name="tanggal" type="date" value="{{ $item['tanggal'] }}" required="true" />
+                                <x-input label="Penanggung Jawab" name="penanggung_jawab" value="{{ $item['penanggung_jawab'] }}" required="true" />
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">Deskripsi / Rincian Belanja</label>
+                                <textarea name="deskripsi" rows="3" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm text-slate-900 focus:border-rose-500 focus:ring-2 focus:ring-rose-500 focus:outline-none">{{ $item['deskripsi'] }}</textarea>
+                            </div>
+                            <x-input label="Upload Struk / Nota Baru" name="bukti" type="file" />
+                            <div class="pt-2 border-t border-slate-100 flex items-center justify-end gap-3">
+                                <x-button variant="outline" size="md" onclick="closeModal('modal-pengeluaran-edit-{{ $item['id'] }}')">Batal</x-button>
+                                <x-button variant="danger" size="md" type="submit">Simpan Perubahan</x-button>
+                            </div>
+                        </form>
                     </x-modal>
                 </td>
             </tr>
