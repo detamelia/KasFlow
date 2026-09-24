@@ -17,24 +17,81 @@ class KategoriController extends Controller
         $role = $request->query('role', 'bendahara');
         $search = $request->query('search', '');
         $jenisFilter = $request->query('jenis', 'semua');
+        $dbWarning = null;
 
-        $query = KategoriTransaksi::withCount('transaksi');
+        try {
+            $query = KategoriTransaksi::withCount('transaksi');
 
-        if (!empty($search)) {
-            $query->where('nama_kategori', 'like', '%' . trim($search) . '%');
+            if (!empty($search)) {
+                $query->where('nama_kategori', 'like', '%' . trim($search) . '%');
+            }
+
+            if (in_array($jenisFilter, ['pemasukan', 'pengeluaran'])) {
+                $query->where('jenis', $jenisFilter);
+            }
+
+            $kategoriList = $query->orderBy('nama_kategori', 'asc')->get();
+
+            // Data KPI Summary
+            $totalKategori = KategoriTransaksi::count();
+            $totalPemasukan = KategoriTransaksi::where('jenis', 'pemasukan')->count();
+            $totalPengeluaran = KategoriTransaksi::where('jenis', 'pengeluaran')->count();
+            $totalTransaksi = Transaksi::count();
+        } catch (\Throwable $e) {
+            // Fallback graceful jika driver database (misal pdo_sqlite) belum diaktifkan di PHP lingkungan pengguna
+            $dbWarning = 'Peringatan Database: ' . $e->getMessage() . '. Pastikan ekstensi "pdo_sqlite" sudah diaktifkan pada file php.ini dan jalankan "php artisan migrate".';
+
+            $mockData = collect([
+                (object)[
+                    'id' => 1,
+                    'nama_kategori' => 'Iuran Anggota',
+                    'jenis' => 'pemasukan',
+                    'transaksi_count' => 2,
+                    'created_at' => now()->subDays(10),
+                    'updated_at' => now()->subDays(2),
+                ],
+                (object)[
+                    'id' => 2,
+                    'nama_kategori' => 'Donasi',
+                    'jenis' => 'pemasukan',
+                    'transaksi_count' => 1,
+                    'created_at' => now()->subDays(8),
+                    'updated_at' => now()->subDays(1),
+                ],
+                (object)[
+                    'id' => 3,
+                    'nama_kategori' => 'ATK',
+                    'jenis' => 'pengeluaran',
+                    'transaksi_count' => 1,
+                    'created_at' => now()->subDays(6),
+                    'updated_at' => now()->subDays(3),
+                ],
+                (object)[
+                    'id' => 4,
+                    'nama_kategori' => 'Konsumsi',
+                    'jenis' => 'pengeluaran',
+                    'transaksi_count' => 1,
+                    'created_at' => now()->subDays(5),
+                    'updated_at' => now()->subDays(1),
+                ],
+            ]);
+
+            if (!empty($search)) {
+                $mockData = $mockData->filter(function ($item) use ($search) {
+                    return stripos($item->nama_kategori, trim($search)) !== false;
+                });
+            }
+
+            if (in_array($jenisFilter, ['pemasukan', 'pengeluaran'])) {
+                $mockData = $mockData->where('jenis', $jenisFilter);
+            }
+
+            $kategoriList = $mockData->values();
+            $totalKategori = 4;
+            $totalPemasukan = 2;
+            $totalPengeluaran = 2;
+            $totalTransaksi = 5;
         }
-
-        if (in_array($jenisFilter, ['pemasukan', 'pengeluaran'])) {
-            $query->where('jenis', $jenisFilter);
-        }
-
-        $kategoriList = $query->orderBy('nama_kategori', 'asc')->get();
-
-        // Data KPI Summary
-        $totalKategori = KategoriTransaksi::count();
-        $totalPemasukan = KategoriTransaksi::where('jenis', 'pemasukan')->count();
-        $totalPengeluaran = KategoriTransaksi::where('jenis', 'pengeluaran')->count();
-        $totalTransaksi = Transaksi::count();
 
         return view('kategori.index', compact(
             'kategoriList',
@@ -44,7 +101,8 @@ class KategoriController extends Controller
             'totalKategori',
             'totalPemasukan',
             'totalPengeluaran',
-            'totalTransaksi'
+            'totalTransaksi',
+            'dbWarning'
         ));
     }
 
@@ -86,13 +144,18 @@ class KategoriController extends Controller
             'jenis.in' => 'Jenis kategori harus berupa "pemasukan" atau "pengeluaran".',
         ]);
 
-        $kategori = KategoriTransaksi::create([
-            'nama_kategori' => trim($validated['nama_kategori']),
-            'jenis' => $validated['jenis'],
-        ]);
+        try {
+            $kategori = KategoriTransaksi::create([
+                'nama_kategori' => trim($validated['nama_kategori']),
+                'jenis' => $validated['jenis'],
+            ]);
 
-        return redirect()->route('kategori.index', ['role' => $role])
-            ->with('success', 'Kategori "' . $kategori->nama_kategori . '" berhasil ditambahkan.');
+            return redirect()->route('kategori.index', ['role' => $role])
+                ->with('success', 'Kategori "' . $kategori->nama_kategori . '" berhasil ditambahkan.');
+        } catch (\Throwable $e) {
+            return redirect()->route('kategori.index', ['role' => $role])
+                ->with('error', 'Gagal menyimpan kategori ke database: ' . $e->getMessage() . '. Pastikan driver database (pdo_sqlite) aktif di php.ini.');
+        }
     }
 
     /**
@@ -101,9 +164,14 @@ class KategoriController extends Controller
     public function edit(Request $request, $id)
     {
         $role = $request->query('role', 'bendahara');
-        $kategori = KategoriTransaksi::withCount('transaksi')->findOrFail($id);
 
-        return view('kategori.edit', compact('kategori', 'role'));
+        try {
+            $kategori = KategoriTransaksi::withCount('transaksi')->findOrFail($id);
+            return view('kategori.edit', compact('kategori', 'role'));
+        } catch (\Throwable $e) {
+            return redirect()->route('kategori.index', ['role' => $role])
+                ->with('error', 'Kategori tidak dapat dimuat dari database: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -112,7 +180,13 @@ class KategoriController extends Controller
     public function update(Request $request, $id)
     {
         $role = $request->input('role', $request->query('role', 'bendahara'));
-        $kategori = KategoriTransaksi::findOrFail($id);
+
+        try {
+            $kategori = KategoriTransaksi::findOrFail($id);
+        } catch (\Throwable $e) {
+            return redirect()->route('kategori.index', ['role' => $role])
+                ->with('error', 'Kategori tidak ditemukan di database: ' . $e->getMessage());
+        }
 
         $validated = $request->validate([
             'nama_kategori' => [
@@ -135,14 +209,19 @@ class KategoriController extends Controller
             'jenis.in' => 'Jenis kategori harus berupa "pemasukan" atau "pengeluaran".',
         ]);
 
-        $namaLama = $kategori->nama_kategori;
-        $kategori->update([
-            'nama_kategori' => trim($validated['nama_kategori']),
-            'jenis' => $validated['jenis'],
-        ]);
+        try {
+            $namaLama = $kategori->nama_kategori;
+            $kategori->update([
+                'nama_kategori' => trim($validated['nama_kategori']),
+                'jenis' => $validated['jenis'],
+            ]);
 
-        return redirect()->route('kategori.index', ['role' => $role])
-            ->with('success', 'Kategori "' . $namaLama . '" berhasil diperbarui menjadi "' . $kategori->nama_kategori . '".');
+            return redirect()->route('kategori.index', ['role' => $role])
+                ->with('success', 'Kategori "' . $namaLama . '" berhasil diperbarui menjadi "' . $kategori->nama_kategori . '".');
+        } catch (\Throwable $e) {
+            return redirect()->route('kategori.index', ['role' => $role])
+                ->with('error', 'Gagal memperbarui kategori: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -151,18 +230,24 @@ class KategoriController extends Controller
     public function destroy(Request $request, $id)
     {
         $role = $request->input('role', $request->query('role', 'bendahara'));
-        $kategori = KategoriTransaksi::withCount('transaksi')->findOrFail($id);
 
-        // Jika kategori masih memiliki transaksi, lindungi data transaksi dan beri peringatan
-        if ($kategori->transaksi_count > 0) {
+        try {
+            $kategori = KategoriTransaksi::withCount('transaksi')->findOrFail($id);
+
+            // Jika kategori masih memiliki transaksi, lindungi data transaksi dan beri peringatan
+            if ($kategori->transaksi_count > 0) {
+                return redirect()->route('kategori.index', ['role' => $role])
+                    ->with('error', 'Kategori "' . $kategori->nama_kategori . '" tidak dapat dihapus karena masih digunakan oleh ' . $kategori->transaksi_count . ' transaksi.');
+            }
+
+            $namaKategori = $kategori->nama_kategori;
+            $kategori->delete();
+
             return redirect()->route('kategori.index', ['role' => $role])
-                ->with('error', 'Kategori "' . $kategori->nama_kategori . '" tidak dapat dihapus karena masih digunakan oleh ' . $kategori->transaksi_count . ' transaksi.');
+                ->with('success', 'Kategori "' . $namaKategori . '" berhasil dihapus.');
+        } catch (\Throwable $e) {
+            return redirect()->route('kategori.index', ['role' => $role])
+                ->with('error', 'Gagal menghapus kategori: ' . $e->getMessage());
         }
-
-        $namaKategori = $kategori->nama_kategori;
-        $kategori->delete();
-
-        return redirect()->route('kategori.index', ['role' => $role])
-            ->with('success', 'Kategori "' . $namaKategori . '" berhasil dihapus.');
     }
 }
