@@ -16,12 +16,6 @@
         </x-alert>
     @endif
 
-    @if (!empty($dbWarning))
-        <x-alert type="warning" title="Pemberitahuan Konfigurasi PHP Teman Anda" class="mb-4">
-            {{ $dbWarning }}
-        </x-alert>
-    @endif
-
     @if ($errors->any())
         <x-alert type="danger" title="Validasi Gagal" class="mb-4">
             <ul class="list-disc list-inside space-y-1 text-xs">
