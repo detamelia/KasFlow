@@ -4,26 +4,6 @@ namespace App\Support;
 
 class MockKasFlowData
 {
-    public static function getSummary(?string $role = 'bendahara'): array
-    {
-        return [
-            'organization_name' => 'Himpunan Mahasiswa Informatika (HMI)',
-            'period' => 'September 2026',
-            'role' => $role ?? 'bendahara',
-            'saldo_utama' => 18450000,
-            'saldo_formatted' => 'Rp 18.450.000',
-            'pemasukan_bulan_ini' => 7500000,
-            'pemasukan_formatted' => 'Rp 7.500.000',
-            'pemasukan_trend' => '+14.8%',
-            'pengeluaran_bulan_ini' => 3250000,
-            'pengeluaran_formatted' => 'Rp 3.250.000',
-            'pengeluaran_trend' => '-5.2%',
-            'total_transaksi' => 42,
-            'transaksi_pending' => 3,
-            'cashflow_ratio' => '2.3x',
-        ];
-    }
-
     public static function getTransactions(): array
     {
         return [
@@ -150,6 +130,43 @@ class MockKasFlowData
         ];
     }
 
+    public static function getSummary(?string $role = 'bendahara'): array
+    {
+        $transactions = self::getTransactions();
+
+        $totalPemasukan = array_sum(array_map(function ($t) {
+            return $t['jenis'] === 'pemasukan' ? $t['nominal'] : 0;
+        }, $transactions));
+
+        $totalPengeluaran = array_sum(array_map(function ($t) {
+            return $t['jenis'] === 'pengeluaran' ? $t['nominal'] : 0;
+        }, $transactions));
+
+        $saldoAwal = 10700000;
+        $saldoUtama = $saldoAwal + $totalPemasukan - $totalPengeluaran;
+
+        $pendingCount = count(array_filter($transactions, function ($t) {
+            return $t['status'] === 'Pending';
+        }));
+
+        return [
+            'organization_name' => 'Himpunan Mahasiswa Informatika (HMI)',
+            'period' => 'September 2026',
+            'role' => $role ?? 'bendahara',
+            'saldo_utama' => $saldoUtama,
+            'saldo_formatted' => 'Rp '.number_format($saldoUtama, 0, ',', '.'),
+            'pemasukan_bulan_ini' => $totalPemasukan,
+            'pemasukan_formatted' => 'Rp '.number_format($totalPemasukan, 0, ',', '.'),
+            'pemasukan_trend' => '+14.8%',
+            'pengeluaran_bulan_ini' => $totalPengeluaran,
+            'pengeluaran_formatted' => 'Rp '.number_format($totalPengeluaran, 0, ',', '.'),
+            'pengeluaran_trend' => '-5.2%',
+            'total_transaksi' => count($transactions),
+            'transaksi_pending' => $pendingCount,
+            'cashflow_ratio' => '3.4x',
+        ];
+    }
+
     public static function getIncomeCategories(): array
     {
         return ['Uang Kas', 'Sponsorship', 'Dana Hibah', 'Donasi', 'Pendaftaran Event', 'Lain-lain'];
@@ -167,7 +184,7 @@ class MockKasFlowData
             ['bulan' => 'Juni 2026', 'pemasukan' => 8500000, 'pengeluaran' => 5200000, 'saldo_bersih' => 3300000],
             ['bulan' => 'Juli 2026', 'pemasukan' => 4900000, 'pengeluaran' => 3800000, 'saldo_bersih' => 1100000],
             ['bulan' => 'Agustus 2026', 'pemasukan' => 9100000, 'pengeluaran' => 4600000, 'saldo_bersih' => 4500000],
-            ['bulan' => 'September 2026', 'pemasukan' => 7500000, 'pengeluaran' => 3250000, 'saldo_bersih' => 4250000],
+            ['bulan' => 'September 2026', 'pemasukan' => 11000000, 'pengeluaran' => 3250000, 'saldo_bersih' => 7750000],
         ];
     }
 
@@ -175,14 +192,15 @@ class MockKasFlowData
     {
         return [
             'pemasukan' => [
-                ['kategori' => 'Sponsorship', 'nominal' => 5000000, 'persen' => 66.7, 'color' => 'bg-emerald-500'],
-                ['kategori' => 'Uang Kas', 'nominal' => 2500000, 'persen' => 33.3, 'color' => 'bg-teal-500'],
+                ['kategori' => 'Sponsorship', 'nominal' => 5000000, 'persen' => 45.5, 'color' => 'bg-emerald-500'],
+                ['kategori' => 'Dana Hibah', 'nominal' => 3500000, 'persen' => 31.8, 'color' => 'bg-teal-500'],
+                ['kategori' => 'Uang Kas', 'nominal' => 2500000, 'persen' => 22.7, 'color' => 'bg-sky-500'],
             ],
             'pengeluaran' => [
                 ['kategori' => 'Logistik', 'nominal' => 1150000, 'persen' => 35.4, 'color' => 'bg-rose-500'],
+                ['kategori' => 'Transportasi', 'nominal' => 1000000, 'persen' => 30.8, 'color' => 'bg-sky-500'],
                 ['kategori' => 'Operasional', 'nominal' => 650000, 'persen' => 20.0, 'color' => 'bg-amber-500'],
                 ['kategori' => 'Konsumsi', 'nominal' => 450000, 'persen' => 13.8, 'color' => 'bg-indigo-500'],
-                ['kategori' => 'Transportasi', 'nominal' => 1000000, 'persen' => 30.8, 'color' => 'bg-sky-500'],
             ],
         ];
     }
