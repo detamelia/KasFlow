@@ -2,6 +2,21 @@
     'role' => 'bendahara',
     'title' => 'Dashboard',
 ])
+@php
+    $user = auth()->user();
+
+    $initials = collect(explode(' ', trim($user->name)))
+        ->filter()
+        ->take(2)
+        ->map(fn ($w) => mb_strtoupper(mb_substr($w, 0, 1)))
+        ->implode('');
+
+    $roleLabel = [
+        'bendahara' => 'Bendahara',
+        'ketua'     => 'Ketua Organisasi',
+        'anggota'   => 'Anggota',
+    ][$role] ?? ucfirst($role);
+@endphp
 
 <header class="sticky top-0 z-30 h-16 glass-nav px-4 sm:px-6 flex items-center justify-between transition-all">
     <!-- Left Section: Sidebar Toggle & Page Title -->
@@ -23,25 +38,7 @@
 
     <!-- Right Section: Role Switcher, Notifications, Search, User Avatar -->
     <div class="flex items-center gap-2 sm:gap-4">
-        <!-- Interactive Role Switcher Toggle (bendahara <-> anggota) -->
-        <div class="relative group">
-            <div class="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200/80">
-                <a
-                    href="{{ request()->fullUrlWithQuery(['role' => 'bendahara']) }}"
-                    class="px-2.5 py-1 text-xs font-semibold rounded-lg transition-all {{ $role === 'bendahara' ? 'bg-white text-emerald-700 shadow-2xs' : 'text-slate-600 hover:text-slate-900' }}"
-                    title="Beralih ke mode Bendahara"
-                >
-                    Bendahara
-                </a>
-                <a
-                    href="{{ request()->fullUrlWithQuery(['role' => 'anggota']) }}"
-                    class="px-2.5 py-1 text-xs font-semibold rounded-lg transition-all {{ $role === 'anggota' ? 'bg-white text-indigo-700 shadow-2xs' : 'text-slate-600 hover:text-slate-900' }}"
-                    title="Beralih ke mode Ketua & Anggota"
-                >
-                    Ketua / Anggota
-                </a>
-            </div>
-        </div>
+       
 
         <!-- Global Search Input Mock -->
         <div class="hidden md:block relative w-48 lg:w-64">
@@ -95,14 +92,14 @@
         <!-- User Profile Pill -->
         <div class="flex items-center gap-2.5 pl-2 border-l border-slate-200/80">
             <div class="w-9 h-9 rounded-xl bg-slate-900 text-emerald-400 font-bold flex items-center justify-center text-xs shadow-2xs border border-slate-700">
-                {{ $role === 'bendahara' ? 'SR' : 'MR' }}
+                {{ $initials }}
             </div>
             <div class="hidden sm:block text-left">
                 <span class="block text-xs font-semibold text-slate-900 leading-tight">
-                    {{ $role === 'bendahara' ? 'Siti Rahma' : 'Muhammad Rizky' }}
+                   {{ $user->name }}
                 </span>
                 <span class="block text-[11px] text-slate-500 leading-tight">
-                    {{ $role === 'bendahara' ? 'Bendahara Utama' : 'Ketua Organisasi' }}
+                    {{ $roleLabel }}
                 </span>
             </div>
         </div>

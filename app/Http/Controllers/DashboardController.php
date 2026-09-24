@@ -9,7 +9,9 @@ class DashboardController extends Controller
 {
     public function index(Request $request)
     {
-        $role = $request->query('role', 'bendahara');
+        // Role diambil dari akun yang login, bukan dari URL
+        $role = $request->user()->role;
+
         $summary = MockKasFlowData::getSummary($role);
         $transactions = MockKasFlowData::getTransactions();
         $monthlyReports = MockKasFlowData::getMonthlyReports();
