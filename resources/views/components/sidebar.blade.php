@@ -43,19 +43,19 @@ $currentRoute = request()->route() ? request()->route()->getName() : '';
         </div>
 
         <!-- Role Pill Indicator -->
-        <div class="px-4 py-3 bg-slate-900/80 border-b border-slate-800/60">
-            <div class="flex items-center justify-between bg-slate-800/90 px-3 py-2 rounded-xl border border-slate-700/60">
-                <div class="flex items-center gap-2">
-                    <span class="w-2 h-2 rounded-full {{ $role === 'bendahara' ? 'bg-emerald-400 animate-pulse' : 'bg-indigo-400' }}"></span>
-                    <span class="text-xs font-semibold text-slate-200">
-                        {{ $role === 'bendahara' ? 'Akses Bendahara' : 'Akses Ketua & Anggota' }}
-                    </span>
-                </div>
-                <span class="text-[10px] px-1.5 py-0.5 rounded font-mono uppercase bg-slate-700 text-slate-300">
-                    Akses {{ ucfirst($role) }}
-                </span>
-            </div>
+<div class="px-4 py-3 bg-slate-900/80 border-b border-slate-800/60">
+    <div class="flex items-center justify-between bg-slate-800/90 px-3 py-2 rounded-xl border border-slate-700/60">
+        <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full {{ $role === 'bendahara' ? 'bg-emerald-400 animate-pulse' : 'bg-indigo-400' }}"></span>
+            <span class="text-xs font-semibold text-slate-200">
+                Akses {{ ucfirst($role) }}
+            </span>
         </div>
+        <span class="text-[10px] px-1.5 py-0.5 rounded font-mono uppercase bg-slate-700 text-slate-300">
+            {{ $role === 'bendahara' ? 'Full' : 'Read-only' }}
+        </span>
+    </div>
+</div>
 
         <!-- Navigation Menu -->
         <nav class="px-3 py-4 space-y-1.5 overflow-y-auto max-h-[calc(100vh-210px)]">

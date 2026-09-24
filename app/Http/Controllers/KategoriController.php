@@ -14,7 +14,7 @@ class KategoriController extends Controller
      */
     public function index(Request $request)
     {
-        $role = $request->query('role', 'bendahara');
+        $role = $request->user()->role;
         $search = $request->query('search', '');
         $jenisFilter = $request->query('jenis', 'semua');
 
@@ -53,7 +53,7 @@ class KategoriController extends Controller
      */
     public function create(Request $request)
     {
-        $role = $request->query('role', 'bendahara');
+        $role = $request->user()->role;
 
         return view('kategori.create', compact('role'));
     }
@@ -63,7 +63,7 @@ class KategoriController extends Controller
      */
     public function store(Request $request)
     {
-        $role = $request->input('role', $request->query('role', 'bendahara'));
+        $role = $request->user()->role;
 
         $validated = $request->validate([
             'nama_kategori' => [
@@ -91,7 +91,7 @@ class KategoriController extends Controller
             'jenis' => $validated['jenis'],
         ]);
 
-        return redirect()->route('kategori.index', ['role' => $role])
+        return redirect()->route('kategori.index')
             ->with('success', 'Kategori "' . $kategori->nama_kategori . '" berhasil ditambahkan.');
     }
 
@@ -100,7 +100,7 @@ class KategoriController extends Controller
      */
     public function edit(Request $request, $id)
     {
-        $role = $request->query('role', 'bendahara');
+        $role = $request->user()->role;
         $kategori = KategoriTransaksi::withCount('transaksi')->findOrFail($id);
 
         return view('kategori.edit', compact('kategori', 'role'));
@@ -111,7 +111,7 @@ class KategoriController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $role = $request->input('role', $request->query('role', 'bendahara'));
+        $role = $request->user()->role;
         $kategori = KategoriTransaksi::findOrFail($id);
 
         $validated = $request->validate([
@@ -141,7 +141,7 @@ class KategoriController extends Controller
             'jenis' => $validated['jenis'],
         ]);
 
-        return redirect()->route('kategori.index', ['role' => $role])
+        return redirect()->route('kategori.index')
             ->with('success', 'Kategori "' . $namaLama . '" berhasil diperbarui menjadi "' . $kategori->nama_kategori . '".');
     }
 
@@ -150,19 +150,19 @@ class KategoriController extends Controller
      */
     public function destroy(Request $request, $id)
     {
-        $role = $request->input('role', $request->query('role', 'bendahara'));
+        $role = $request->user()->role;
         $kategori = KategoriTransaksi::withCount('transaksi')->findOrFail($id);
 
         // Jika kategori masih memiliki transaksi, lindungi data transaksi dan beri peringatan
         if ($kategori->transaksi_count > 0) {
-            return redirect()->route('kategori.index', ['role' => $role])
+            return redirect()->route('kategori.index')
                 ->with('error', 'Kategori "' . $kategori->nama_kategori . '" tidak dapat dihapus karena masih digunakan oleh ' . $kategori->transaksi_count . ' transaksi.');
         }
 
         $namaKategori = $kategori->nama_kategori;
         $kategori->delete();
 
-        return redirect()->route('kategori.index', ['role' => $role])
+        return redirect()->route('kategori.index')
             ->with('success', 'Kategori "' . $namaKategori . '" berhasil dihapus.');
     }
 }

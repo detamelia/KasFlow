@@ -9,7 +9,7 @@ class TransaksiController extends Controller
 {
     public function index(Request $request)
     {
-        $role = $request->query('role', 'bendahara');
+        $role = $request->user()->role;
         $jenisFilter = $request->query('jenis', 'semua');
         $search = $request->query('search', '');
 
