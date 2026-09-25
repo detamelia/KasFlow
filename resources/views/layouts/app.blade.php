@@ -20,12 +20,12 @@
 
     <div class="min-h-screen flex flex-col lg:flex-row">
         <!-- Sidebar Component -->
-        <x-sidebar :role="$role ?? 'bendahara'" />
+        <x-sidebar :role="auth()->user()->role" />
 
         <!-- Main Workspace Area -->
         <div class="flex-1 lg:pl-64 flex flex-col min-h-screen transition-all duration-300">
             <!-- Navbar Component -->
-            <x-navbar :role="$role ?? 'bendahara'" :title="$title ?? 'KasFlow'" />
+            <x-navbar :role="auth()->user()->role" :title="$title ?? 'KasFlow'" />
 
             <!-- Toast Alert Container (Dynamic JavaScript Notifications) -->
             <div id="toast-container" class="fixed top-20 right-6 z-50 flex flex-col gap-2 max-w-sm"></div>
@@ -113,4 +113,5 @@
     </script>
     @stack('scripts')
 </body>
+
 </html>

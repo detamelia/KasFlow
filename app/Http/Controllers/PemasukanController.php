@@ -9,7 +9,7 @@ class PemasukanController extends Controller
 {
     public function index(Request $request)
     {
-        $role = $request->query('role', 'bendahara');
+        $role = $request->user()->role;
         $allTransactions = MockKasFlowData::getTransactions();
 
         $pemasukan = array_values(array_filter($allTransactions, function ($t) {

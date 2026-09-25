@@ -96,7 +96,7 @@ class KategoriController extends Controller
      */
     public function index(Request $request)
     {
-        $role = $request->query('role', 'bendahara');
+        $role = $request->user()->role;
         $search = $request->query('search', '');
         $jenisFilter = $request->query('jenis', 'semua');
 
@@ -168,7 +168,7 @@ class KategoriController extends Controller
      */
     public function create(Request $request)
     {
-        $role = $request->query('role', 'bendahara');
+        $role = $request->user()->role;
 
         return view('kategori.create', compact('role'));
     }
@@ -178,7 +178,7 @@ class KategoriController extends Controller
      */
     public function store(Request $request)
     {
-        $role = $request->input('role', $request->query('role', 'bendahara'));
+        $role = $request->user()->role;
 
         $uniqueRule = $this->isDatabaseAvailable()
             ? 'unique:kategori_transaksi,nama_kategori'
@@ -232,7 +232,7 @@ class KategoriController extends Controller
             $displayName = $namaKategori;
         }
 
-        return redirect()->route('kategori.index', ['role' => $role])
+        return redirect()->route('kategori.index')
             ->with('success', 'Kategori "' . $displayName . '" berhasil ditambahkan.');
     }
 
@@ -241,7 +241,7 @@ class KategoriController extends Controller
      */
     public function edit(Request $request, $id)
     {
-        $role = $request->query('role', 'bendahara');
+        $role = $request->user()->role;
 
         if ($this->isDatabaseAvailable()) {
             $kategori = KategoriTransaksi::withCount('transaksi')->findOrFail($id);
@@ -250,7 +250,7 @@ class KategoriController extends Controller
             $found = collect($list)->firstWhere('id', (int)$id);
 
             if (!$found) {
-                return redirect()->route('kategori.index', ['role' => $role])
+                return redirect()->route('kategori.index')
                     ->with('error', 'Kategori tidak ditemukan.');
             }
 
@@ -272,8 +272,6 @@ class KategoriController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $role = $request->input('role', $request->query('role', 'bendahara'));
-
         $uniqueRule = $this->isDatabaseAvailable()
             ? Rule::unique('kategori_transaksi', 'nama_kategori')->ignore($id)
             : '';
@@ -327,7 +325,7 @@ class KategoriController extends Controller
             $request->session()->put('mock_kategori_data', $list);
         }
 
-        return redirect()->route('kategori.index', ['role' => $role])
+        return redirect()->route('kategori.index')
             ->with('success', 'Kategori "' . $namaLama . '" berhasil diperbarui menjadi "' . $namaBaru . '".');
     }
 
@@ -336,13 +334,11 @@ class KategoriController extends Controller
      */
     public function destroy(Request $request, $id)
     {
-        $role = $request->input('role', $request->query('role', 'bendahara'));
-
         if ($this->isDatabaseAvailable()) {
             $kategori = KategoriTransaksi::withCount('transaksi')->findOrFail($id);
 
             if ($kategori->transaksi_count > 0) {
-                return redirect()->route('kategori.index', ['role' => $role])
+                return redirect()->route('kategori.index')
                     ->with('error', 'Kategori "' . $kategori->nama_kategori . '" tidak dapat dihapus karena masih digunakan oleh ' . $kategori->transaksi_count . ' transaksi.');
             }
 
@@ -362,12 +358,12 @@ class KategoriController extends Controller
             }
 
             if (!$foundItem) {
-                return redirect()->route('kategori.index', ['role' => $role])
+                return redirect()->route('kategori.index')
                     ->with('error', 'Kategori tidak ditemukan.');
             }
 
             if ($foundItem['transaksi_count'] > 0) {
-                return redirect()->route('kategori.index', ['role' => $role])
+                return redirect()->route('kategori.index')
                     ->with('error', 'Kategori "' . $foundItem['nama_kategori'] . '" tidak dapat dihapus karena masih digunakan oleh ' . $foundItem['transaksi_count'] . ' transaksi.');
             }
 
@@ -376,7 +372,7 @@ class KategoriController extends Controller
             $request->session()->put('mock_kategori_data', $list);
         }
 
-        return redirect()->route('kategori.index', ['role' => $role])
+        return redirect()->route('kategori.index')
             ->with('success', 'Kategori "' . $namaKategori . '" berhasil dihapus.');
     }
 }
