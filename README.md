@@ -8,7 +8,7 @@ KasFlow dikembangkan sebagai sistem manajemen keuangan organisasi yang membantu 
 
 Sistem ini berfokus pada pengelolaan pemasukan, pengeluaran, transaksi, saldo, serta penyajian informasi keuangan yang dapat diakses sesuai dengan peran pengguna.
 
-KasFlow memiliki pengguna utama yaitu Bendahara serta Ketua dan Anggota Organisasi. Bendahara bertanggung jawab dalam mengelola data keuangan, sedangkan Ketua dan Anggota Organisasi dapat melihat dan memantau kondisi keuangan organisasi.
+KasFlow memiliki dua peran pengguna, yaitu **Bendahara** serta **Ketua dan Anggota Organisasi**. Bendahara bertanggung jawab dalam mengelola data keuangan, sedangkan Ketua dan Anggota Organisasi dapat melihat dan memantau kondisi keuangan organisasi.
 
 ## Tujuan
 
@@ -38,9 +38,9 @@ Bendahara dapat:
 
 ### 2. Ketua dan Anggota Organisasi
 
-Ketua dan anggota organisasi merupakan pengguna yang dapat memantau kondisi keuangan organisasi.
+Ketua dan Anggota Organisasi merupakan pengguna yang dapat memantau kondisi keuangan organisasi.
 
-Ketua dan anggota organisasi dapat:
+Ketua dan Anggota Organisasi dapat:
 
 - Melihat kondisi keuangan organisasi.
 - Melihat saldo organisasi.
@@ -79,7 +79,7 @@ Project KasFlow menggunakan teknologi berikut:
 
 KasFlow menggunakan pendekatan **Laravel Blade Monolith**.
 
-Pada pendekatan ini, bagian backend dan frontend dikembangkan dalam satu project Laravel. Antarmuka dibangun menggunakan Laravel Blade dan terhubung langsung dengan komponen backend Laravel.
+Pada pendekatan ini, bagian frontend dan backend dikembangkan dalam satu project Laravel. Antarmuka dibangun menggunakan Laravel Blade dan terhubung langsung dengan komponen backend Laravel.
 
 ### Alasan Pemilihan Arsitektur
 
@@ -95,11 +95,11 @@ Pendekatan Laravel Blade Monolith dipilih karena:
 
 ### Trade-off
 
-Kekurangan dari pendekatan ini adalah frontend dan backend berada dalam satu project sehingga perubahan pada salah satu bagian perlu memperhatikan keterkaitan dengan bagian lainnya.
+Kekurangan dari pendekatan Laravel Blade Monolith adalah frontend dan backend berada dalam satu project sehingga fleksibilitas pemisahan frontend dan backend menjadi lebih rendah. Jika sistem dikembangkan untuk aplikasi mobile atau client lain, diperlukan pengembangan API tambahan agar client lain dapat mengakses data dari sistem.
 
 ## Struktur Project
 
-Struktur utama project KasFlow mengikuti struktur aplikasi Laravel:
+Struktur utama project KasFlow mengikuti struktur aplikasi Laravel.
 
 ```text
 KasFlow/
@@ -107,6 +107,9 @@ KasFlow/
 ├── bootstrap/
 ├── config/
 ├── database/
+│   ├── factories/
+│   ├── migrations/
+│   └── seeders/
 ├── public/
 ├── resources/
 ├── routes/
@@ -118,3 +121,101 @@ KasFlow/
 ├── composer.json
 ├── composer.lock
 └── README.md
+```
+
+## Prasyarat
+
+Sebelum menjalankan project KasFlow, pastikan perangkat telah terpasang:
+
+- PHP 8.2 atau versi yang lebih baru.
+- Composer.
+- Node.js dan npm.
+- PostgreSQL.
+- Git.
+
+## Cara Menjalankan Project dari Nol
+
+1. Clone repository KasFlow.
+
+```bash
+git clone https://github.com/detamelia/KasFlow.git
+cd KasFlow
+```
+
+2. Install dependency Laravel.
+
+```bash
+composer install
+```
+
+3. Install dependency frontend.
+
+```bash
+npm install
+```
+
+4. Salin file konfigurasi environment.
+
+**Linux / macOS**
+
+```bash
+cp .env.example .env
+```
+
+**Windows PowerShell**
+
+```powershell
+Copy-Item .env.example .env
+```
+
+5. Buka file `.env`, kemudian sesuaikan konfigurasi PostgreSQL.
+
+```env
+DB_CONNECTION=pgsql
+DB_HOST=127.0.0.1
+DB_PORT=5432
+DB_DATABASE=kasFlow
+DB_USERNAME=postgres
+DB_PASSWORD=
+```
+
+6. Generate application key Laravel.
+
+```bash
+php artisan key:generate
+```
+
+7. Jalankan migration dan seeder.
+
+```bash
+php artisan migrate --seed
+```
+
+8. Jalankan server Laravel.
+
+```bash
+php artisan serve
+```
+
+9. Jalankan Vite untuk asset frontend.
+
+```bash
+npm run dev
+```
+
+Setelah seluruh langkah selesai, aplikasi dapat diakses melalui browser pada alamat:
+
+```text
+http://127.0.0.1:8000
+```
+
+## Akun Demo
+
+Seeder menyediakan data awal agar aplikasi dapat langsung digunakan untuk demonstrasi.
+
+| Peran | Email | Password |
+|--------|-------|----------|
+| Bendahara | `bendahara@kasflow.test` | `12345678` |
+| Ketua/Anggota | `anggota@kasflow.test` | `12345678` |
+
+Project KasFlow dikembangkan sebagai base project tugas akhir mata kuliah Program Studi Teknik Informatika Universitas Lampung Tahun 2026.
