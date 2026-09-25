@@ -9,7 +9,7 @@ class LaporanController extends Controller
 {
     public function index(Request $request)
     {
-        $role = $request->query('role', 'bendahara');
+        $role = $request->user()->role;
         $summary = MockKasFlowData::getSummary($role);
         $monthlyReports = MockKasFlowData::getMonthlyReports();
         $categoryBreakdown = MockKasFlowData::getCategoryBreakdown();
