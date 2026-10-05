@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Support\MockKasFlowData;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class TransaksiController extends Controller
 {
@@ -29,12 +30,50 @@ class TransaksiController extends Controller
             }));
         }
 
-        return view('transaksi.index', [
+        if ($request->query('view') === 'blade') {
+            return view('transaksi.index', [
+                'role' => $role,
+                'transactions' => $transactions,
+                'jenisFilter' => $jenisFilter,
+                'search' => $search,
+                'totalItems' => count($transactions),
+            ]);
+        }
+
+        return Inertia::render('Transaksi/Index', [
             'role' => $role,
             'transactions' => $transactions,
             'jenisFilter' => $jenisFilter,
             'search' => $search,
             'totalItems' => count($transactions),
+        ]);
+    }
+
+    public function show(Request $request, $id)
+    {
+        $role = $request->user()->role;
+        $all = MockKasFlowData::getTransactions();
+        $found = collect($all)->first(fn ($t) => ($t['id'] ?? null) == $id || ($t['kode'] ?? null) == $id);
+
+        if (!$found) {
+            $found = $all[0] ?? [
+                'id' => 1,
+                'kode' => 'TRX-001',
+                'judul' => 'Contoh Transaksi',
+                'jenis' => 'pemasukan',
+                'nominal' => 500000,
+                'kategori' => 'Iuran Anggota',
+                'tanggal' => date('Y-m-d'),
+            ];
+        }
+
+        if ($request->query('view') === 'blade' && view()->exists('transaksi.show')) {
+            return view('transaksi.show', ['transaction' => $found, 'role' => $role]);
+        }
+
+        return Inertia::render('Transaksi/Show', [
+            'transaction' => $found,
+            'role' => $role,
         ]);
     }
 }
