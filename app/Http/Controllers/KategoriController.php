@@ -9,6 +9,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\Rule;
+use Inertia\Inertia;
 
 class KategoriController extends Controller
 {
@@ -96,7 +97,7 @@ class KategoriController extends Controller
      */
     public function index(Request $request)
     {
-        $role = $request->query('role', 'bendahara');
+        $role = $request->user()->role;
         $search = $request->query('search', '');
         $jenisFilter = $request->query('jenis', 'semua');
 
@@ -151,16 +152,73 @@ class KategoriController extends Controller
             $totalTransaksi = $allFallback->sum('transaksi_count');
         }
 
-        return view('kategori.index', compact(
-            'kategoriList',
-            'role',
-            'search',
-            'jenisFilter',
-            'totalKategori',
-            'totalPemasukan',
-            'totalPengeluaran',
-            'totalTransaksi'
-        ));
+        if ($request->query('view') === 'blade') {
+            return view('kategori.index', compact(
+                'kategoriList',
+                'role',
+                'search',
+                'jenisFilter',
+                'totalKategori',
+                'totalPemasukan',
+                'totalPengeluaran',
+                'totalTransaksi'
+            ));
+        }
+
+        return Inertia::render('Kategori/Index', [
+            'kategoriList' => $kategoriList,
+            'role' => $role,
+            'search' => $search,
+            'jenisFilter' => $jenisFilter,
+            'totalKategori' => $totalKategori,
+            'totalPemasukan' => $totalPemasukan,
+            'totalPengeluaran' => $totalPengeluaran,
+            'totalTransaksi' => $totalTransaksi,
+        ]);
+    }
+
+    /**
+     * Tampilkan rincian kategori (show page untuk Inertia & Blade).
+     */
+    public function show(Request $request, $id)
+    {
+        $role = $request->user()->role;
+        $kategori = null;
+        $relatedTransaksi = [];
+
+        if ($this->isDatabaseAvailable()) {
+            $kategori = KategoriTransaksi::withCount('transaksi')->find($id);
+            if ($kategori) {
+                $relatedTransaksi = Transaksi::where('kategori_id', $id)->limit(10)->get();
+            }
+        } else {
+            $list = $this->getFallbackList($request);
+            $found = collect($list)->firstWhere('id', (int)$id);
+            if ($found) {
+                $kategori = (object)[
+                    'id' => $found['id'],
+                    'nama_kategori' => $found['nama_kategori'],
+                    'jenis' => $found['jenis'],
+                    'transaksi_count' => $found['transaksi_count'],
+                    'created_at' => Carbon::parse($found['created_at']),
+                    'updated_at' => Carbon::parse($found['updated_at']),
+                ];
+            }
+        }
+
+        if (!$kategori) {
+            return redirect()->route('kategori.index')->with('error', 'Kategori tidak ditemukan.');
+        }
+
+        if ($request->query('view') === 'blade' && view()->exists('kategori.show')) {
+            return view('kategori.show', compact('kategori', 'role', 'relatedTransaksi'));
+        }
+
+        return Inertia::render('Kategori/Show', [
+            'kategori' => $kategori,
+            'role' => $role,
+            'relatedTransaksi' => $relatedTransaksi,
+        ]);
     }
 
     /**
@@ -168,7 +226,7 @@ class KategoriController extends Controller
      */
     public function create(Request $request)
     {
-        $role = $request->query('role', 'bendahara');
+        $role = $request->user()->role;
 
         return view('kategori.create', compact('role'));
     }
@@ -178,7 +236,7 @@ class KategoriController extends Controller
      */
     public function store(Request $request)
     {
-        $role = $request->input('role', $request->query('role', 'bendahara'));
+        $role = $request->user()->role;
 
         $uniqueRule = $this->isDatabaseAvailable()
             ? 'unique:kategori_transaksi,nama_kategori'
@@ -232,7 +290,7 @@ class KategoriController extends Controller
             $displayName = $namaKategori;
         }
 
-        return redirect()->route('kategori.index', ['role' => $role])
+        return redirect()->route('kategori.index')
             ->with('success', 'Kategori "' . $displayName . '" berhasil ditambahkan.');
     }
 
@@ -241,7 +299,7 @@ class KategoriController extends Controller
      */
     public function edit(Request $request, $id)
     {
-        $role = $request->query('role', 'bendahara');
+        $role = $request->user()->role;
 
         if ($this->isDatabaseAvailable()) {
             $kategori = KategoriTransaksi::withCount('transaksi')->findOrFail($id);
@@ -250,7 +308,7 @@ class KategoriController extends Controller
             $found = collect($list)->firstWhere('id', (int)$id);
 
             if (!$found) {
-                return redirect()->route('kategori.index', ['role' => $role])
+                return redirect()->route('kategori.index')
                     ->with('error', 'Kategori tidak ditemukan.');
             }
 
@@ -272,8 +330,6 @@ class KategoriController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $role = $request->input('role', $request->query('role', 'bendahara'));
-
         $uniqueRule = $this->isDatabaseAvailable()
             ? Rule::unique('kategori_transaksi', 'nama_kategori')->ignore($id)
             : '';
@@ -327,7 +383,7 @@ class KategoriController extends Controller
             $request->session()->put('mock_kategori_data', $list);
         }
 
-        return redirect()->route('kategori.index', ['role' => $role])
+        return redirect()->route('kategori.index')
             ->with('success', 'Kategori "' . $namaLama . '" berhasil diperbarui menjadi "' . $namaBaru . '".');
     }
 
@@ -336,13 +392,11 @@ class KategoriController extends Controller
      */
     public function destroy(Request $request, $id)
     {
-        $role = $request->input('role', $request->query('role', 'bendahara'));
-
         if ($this->isDatabaseAvailable()) {
             $kategori = KategoriTransaksi::withCount('transaksi')->findOrFail($id);
 
             if ($kategori->transaksi_count > 0) {
-                return redirect()->route('kategori.index', ['role' => $role])
+                return redirect()->route('kategori.index')
                     ->with('error', 'Kategori "' . $kategori->nama_kategori . '" tidak dapat dihapus karena masih digunakan oleh ' . $kategori->transaksi_count . ' transaksi.');
             }
 
@@ -362,12 +416,12 @@ class KategoriController extends Controller
             }
 
             if (!$foundItem) {
-                return redirect()->route('kategori.index', ['role' => $role])
+                return redirect()->route('kategori.index')
                     ->with('error', 'Kategori tidak ditemukan.');
             }
 
             if ($foundItem['transaksi_count'] > 0) {
-                return redirect()->route('kategori.index', ['role' => $role])
+                return redirect()->route('kategori.index')
                     ->with('error', 'Kategori "' . $foundItem['nama_kategori'] . '" tidak dapat dihapus karena masih digunakan oleh ' . $foundItem['transaksi_count'] . ' transaksi.');
             }
 
@@ -376,7 +430,7 @@ class KategoriController extends Controller
             $request->session()->put('mock_kategori_data', $list);
         }
 
-        return redirect()->route('kategori.index', ['role' => $role])
+        return redirect()->route('kategori.index')
             ->with('success', 'Kategori "' . $namaKategori . '" berhasil dihapus.');
     }
 }
