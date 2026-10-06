@@ -24,12 +24,16 @@ Route::middleware('auth')->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.index');
     Route::get('/pemasukan', [PemasukanController::class, 'index'])->name('pemasukan.index');
+    Route::get('/pemasukan/{id}', [PemasukanController::class, 'show'])->name('pemasukan.show');
     Route::get('/pengeluaran', [PengeluaranController::class, 'index'])->name('pengeluaran.index');
+    Route::get('/pengeluaran/{id}', [PengeluaranController::class, 'show'])->name('pengeluaran.show');
     Route::get('/transaksi', [TransaksiController::class, 'index'])->name('transaksi.index');
+    Route::get('/transaksi/{id}', [TransaksiController::class, 'show'])->name('transaksi.show');
     Route::get('/laporan', [LaporanController::class, 'index'])->name('laporan.index');
 
     // Khusus bendahara: kelola data
     Route::middleware('role:bendahara')->group(function () {
-        Route::resource('kategori', KategoriController::class)->except(['show']);
+        Route::get('/kategori/{kategori}', [KategoriController::class, 'show'])->name('kategori.show');
+        Route::resource('kategori', KategoriController::class);
     });
 });

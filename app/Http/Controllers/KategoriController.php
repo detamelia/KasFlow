@@ -9,6 +9,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\Rule;
+use Inertia\Inertia;
 
 class KategoriController extends Controller
 {
@@ -151,16 +152,73 @@ class KategoriController extends Controller
             $totalTransaksi = $allFallback->sum('transaksi_count');
         }
 
-        return view('kategori.index', compact(
-            'kategoriList',
-            'role',
-            'search',
-            'jenisFilter',
-            'totalKategori',
-            'totalPemasukan',
-            'totalPengeluaran',
-            'totalTransaksi'
-        ));
+        if ($request->query('view') === 'blade') {
+            return view('kategori.index', compact(
+                'kategoriList',
+                'role',
+                'search',
+                'jenisFilter',
+                'totalKategori',
+                'totalPemasukan',
+                'totalPengeluaran',
+                'totalTransaksi'
+            ));
+        }
+
+        return Inertia::render('Kategori/Index', [
+            'kategoriList' => $kategoriList,
+            'role' => $role,
+            'search' => $search,
+            'jenisFilter' => $jenisFilter,
+            'totalKategori' => $totalKategori,
+            'totalPemasukan' => $totalPemasukan,
+            'totalPengeluaran' => $totalPengeluaran,
+            'totalTransaksi' => $totalTransaksi,
+        ]);
+    }
+
+    /**
+     * Tampilkan rincian kategori (show page untuk Inertia & Blade).
+     */
+    public function show(Request $request, $id)
+    {
+        $role = $request->user()->role;
+        $kategori = null;
+        $relatedTransaksi = [];
+
+        if ($this->isDatabaseAvailable()) {
+            $kategori = KategoriTransaksi::withCount('transaksi')->find($id);
+            if ($kategori) {
+                $relatedTransaksi = Transaksi::where('kategori_id', $id)->limit(10)->get();
+            }
+        } else {
+            $list = $this->getFallbackList($request);
+            $found = collect($list)->firstWhere('id', (int)$id);
+            if ($found) {
+                $kategori = (object)[
+                    'id' => $found['id'],
+                    'nama_kategori' => $found['nama_kategori'],
+                    'jenis' => $found['jenis'],
+                    'transaksi_count' => $found['transaksi_count'],
+                    'created_at' => Carbon::parse($found['created_at']),
+                    'updated_at' => Carbon::parse($found['updated_at']),
+                ];
+            }
+        }
+
+        if (!$kategori) {
+            return redirect()->route('kategori.index')->with('error', 'Kategori tidak ditemukan.');
+        }
+
+        if ($request->query('view') === 'blade' && view()->exists('kategori.show')) {
+            return view('kategori.show', compact('kategori', 'role', 'relatedTransaksi'));
+        }
+
+        return Inertia::render('Kategori/Show', [
+            'kategori' => $kategori,
+            'role' => $role,
+            'relatedTransaksi' => $relatedTransaksi,
+        ]);
     }
 
     /**
