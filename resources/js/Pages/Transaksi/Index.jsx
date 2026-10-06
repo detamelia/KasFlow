@@ -93,7 +93,7 @@ export default function TransaksiIndex({
                             <tr>
                                 <th className="px-6 py-3.5">Kode & Tanggal</th>
                                 <th className="px-6 py-3.5">Judul Transaksi</th>
-                                <th className="px-6 py-3.5">Jenis & Kategori</th>
+                                <th className="px-6 py-3.5 text-center">Jenis & Kategori</th>
                                 <th className="px-6 py-3.5 text-right">Nominal</th>
                                 <th className="px-6 py-3.5 text-right">Aksi</th>
                             </tr>
@@ -112,13 +112,15 @@ export default function TransaksiIndex({
                                                 {item.judul}
                                             </Link>
                                         </td>
-                                        <td className="px-6 py-4">
-                                            <span className={`inline-block px-2.5 py-0.5 rounded-full text-[11px] font-semibold mb-1 ${
-                                                item.jenis === 'pemasukan' ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'
-                                            }`}>
-                                                {item.jenis === 'pemasukan' ? 'Pemasukan' : 'Pengeluaran'}
-                                            </span>
-                                            <span className="block text-[11px] text-slate-500">{item.kategori}</span>
+                                        <td className="px-6 py-4 text-center">
+                                            <div className="flex flex-col items-center justify-center">
+                                                <span className={`inline-block px-2.5 py-0.5 rounded-full text-[11px] font-semibold mb-1 ${
+                                                    item.jenis === 'pemasukan' ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'
+                                                }`}>
+                                                    {item.jenis === 'pemasukan' ? 'Pemasukan' : 'Pengeluaran'}
+                                                </span>
+                                                <span className="block text-[11px] text-slate-500 text-center">{item.kategori}</span>
+                                            </div>
                                         </td>
                                         <td className={`px-6 py-4 text-right font-bold text-sm ${
                                             item.jenis === 'pemasukan' ? 'text-emerald-600' : 'text-rose-600'

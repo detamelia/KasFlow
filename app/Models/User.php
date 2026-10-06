@@ -37,4 +37,20 @@ class User extends Authenticatable
     {
         return $this->hasMany(Transaksi::class);
     }
+
+    /**
+     * Get user role attribute.
+     */
+    public function getRoleAttribute(): string
+    {
+        if (! empty($this->attributes['role'])) {
+            return $this->attributes['role'];
+        }
+
+        if (str_contains(strtolower($this->email ?? ''), 'admin') || str_contains(strtolower($this->email ?? ''), 'bendahara') || str_contains(strtolower($this->name ?? ''), 'admin') || str_contains(strtolower($this->name ?? ''), 'bendahara')) {
+            return 'bendahara';
+        }
+
+        return 'anggota';
+    }
 }

@@ -16,6 +16,9 @@ class KategoriTest extends TestCase
     {
         parent::setUp();
         $this->seed();
+
+        $bendahara = User::where('email', 'admin@kasflow.test')->first();
+        $this->actingAs($bendahara);
     }
     public function test_kategori_index_page_can_be_rendered(): void
     {
@@ -56,7 +59,7 @@ class KategoriTest extends TestCase
 
         $response = $this->post(route('kategori.store'), $payload);
 
-        $response->assertRedirect(route('kategori.index', ['role' => 'bendahara']));
+        $response->assertRedirect(route('kategori.index'));
         $this->assertDatabaseHas('kategori_transaksi', [
             'nama_kategori' => 'Sponsorship Event',
             'jenis' => 'pemasukan',
@@ -96,7 +99,7 @@ class KategoriTest extends TestCase
             'role' => 'bendahara',
         ]);
 
-        $response->assertRedirect(route('kategori.index', ['role' => 'bendahara']));
+        $response->assertRedirect(route('kategori.index'));
         $this->assertDatabaseHas('kategori_transaksi', [
             'id' => $kategori->id,
             'nama_kategori' => 'Kategori Diperbarui',
@@ -113,7 +116,7 @@ class KategoriTest extends TestCase
 
         $response = $this->delete(route('kategori.destroy', $kategori->id));
 
-        $response->assertRedirect(route('kategori.index', ['role' => 'bendahara']));
+        $response->assertRedirect(route('kategori.index'));
         $this->assertDatabaseMissing('kategori_transaksi', [
             'id' => $kategori->id,
         ]);
