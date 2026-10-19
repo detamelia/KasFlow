@@ -10,20 +10,22 @@ class LaporanController extends Controller
 {
     public function index(Request $request)
     {
-        if ($request->header('X-Inertia')) {
-            return Inertia::location(route('laporan.index'));
-        }
-
         $role = $request->user()->role;
         $summary = MockKasFlowData::getSummary($role);
         $monthlyReports = MockKasFlowData::getMonthlyReports();
         $categoryBreakdown = MockKasFlowData::getCategoryBreakdown();
 
-        return view('laporan.index', [
+        $data = [
             'role' => $role,
             'summary' => $summary,
             'monthlyReports' => $monthlyReports,
             'categoryBreakdown' => $categoryBreakdown,
-        ]);
+        ];
+
+        if ($request->query('view') === 'blade') {
+            return view('laporan.index', $data);
+        }
+
+        return Inertia::render('Laporan/Index', $data);
     }
 }

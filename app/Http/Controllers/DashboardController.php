@@ -10,10 +10,6 @@ class DashboardController extends Controller
 {
     public function index(Request $request)
     {
-        if ($request->header('X-Inertia')) {
-            return Inertia::location(route('dashboard'));
-        }
-
         // Role diambil dari akun yang login, bukan dari URL
         $role = $request->user()->role;
 
@@ -22,6 +18,12 @@ class DashboardController extends Controller
         $monthlyReports = MockKasFlowData::getMonthlyReports();
         $categoryBreakdown = MockKasFlowData::getCategoryBreakdown();
 
-        return view('dashboard', compact('summary', 'transactions', 'monthlyReports', 'categoryBreakdown', 'role'));
+        $data = compact('summary', 'transactions', 'monthlyReports', 'categoryBreakdown', 'role');
+
+        if ($request->query('view') === 'blade') {
+            return view('dashboard', $data);
+        }
+
+        return Inertia::render('Dashboard/Index', $data);
     }
 }
