@@ -40,13 +40,13 @@ export default function TransaksiIndex({
                                 href="/pemasukan/create"
                                 className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 shadow-md transition-colors"
                             >
-                                + Pemasukan (Blade)
+                                + Pemasukan
                             </a>
                             <a
                                 href="/pengeluaran/create"
                                 className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-white bg-rose-600 hover:bg-rose-700 shadow-md transition-colors"
                             >
-                                + Pengeluaran (Blade)
+                                + Pengeluaran
                             </a>
                         </div>
                     )}
@@ -128,12 +128,12 @@ export default function TransaksiIndex({
                                             {item.jenis === 'pemasukan' ? '+' : '-'} Rp {Number(item.nominal || 0).toLocaleString('id-ID')}
                                         </td>
                                         <td className="px-6 py-4 text-right">
-                                            {/* Link ke Rincian React */}
+                                            {/* Link ke Rincian */}
                                             <Link
                                                 href={`/transaksi/${item.id || item.kode}`}
-                                                className="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 transition-colors"
+                                                className="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors"
                                             >
-                                                Rincian (React)
+                                                Lihat Detail
                                             </Link>
                                         </td>
                                     </tr>

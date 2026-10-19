@@ -19,7 +19,7 @@ export default function TransaksiShow({ transaction, role = 'bendahara' }) {
                             </svg>
                         </Link>
                         <div>
-                            <span className="text-xs font-semibold text-slate-400 block uppercase">Rincian Transaksi (React)</span>
+                            <span className="text-xs font-semibold text-slate-400 block uppercase">Rincian Transaksi</span>
                             <h1 className="text-2xl font-bold text-slate-900">{transaction?.judul}</h1>
                         </div>
                     </div>

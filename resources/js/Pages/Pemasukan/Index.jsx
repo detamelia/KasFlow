@@ -26,7 +26,7 @@ export default function PemasukanIndex({
                             href="/pemasukan/create"
                             className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-xs text-white bg-emerald-600 hover:bg-emerald-700 shadow-lg shadow-emerald-600/20 transition-all"
                         >
-                            + Tambah Pemasukan (Blade)
+                            + Tambah Pemasukan
                         </a>
                     )}
                 </div>
@@ -81,9 +81,9 @@ export default function PemasukanIndex({
                                             {/* Link React ke Show */}
                                             <Link
                                                 href={`/pemasukan/${item.id || item.kode}`}
-                                                className="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 transition-colors"
+                                                className="px-3 py-1.5 rounded-lg text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 transition-colors"
                                             >
-                                                Rincian (React)
+                                                Lihat Detail
                                             </Link>
                                         </td>
                                     </tr>

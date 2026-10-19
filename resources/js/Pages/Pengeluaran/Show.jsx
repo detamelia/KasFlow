@@ -17,7 +17,7 @@ export default function PengeluaranShow({ item, role = 'bendahara' }) {
                             </svg>
                         </Link>
                         <div>
-                            <span className="text-xs font-semibold text-rose-600 block uppercase">Rincian Pos Pengeluaran (React)</span>
+                            <span className="text-xs font-semibold text-rose-600 block uppercase">Rincian Pos Pengeluaran</span>
                             <h1 className="text-2xl font-bold text-slate-900">{item?.judul}</h1>
                         </div>
                     </div>

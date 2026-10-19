@@ -26,7 +26,7 @@ export default function PengeluaranIndex({
                             href="/pengeluaran/create"
                             className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-xs text-white bg-rose-600 hover:bg-rose-700 shadow-lg shadow-rose-600/20 transition-all"
                         >
-                            + Tambah Pengeluaran (Blade)
+                            + Tambah Pengeluaran
                         </a>
                     )}
                 </div>
@@ -81,9 +81,9 @@ export default function PengeluaranIndex({
                                             {/* Link React ke Show */}
                                             <Link
                                                 href={`/pengeluaran/${item.id || item.kode}`}
-                                                className="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 transition-colors"
+                                                className="px-3 py-1.5 rounded-lg text-xs font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 transition-colors"
                                             >
-                                                Rincian (React)
+                                                Lihat Detail
                                             </Link>
                                         </td>
                                     </tr>

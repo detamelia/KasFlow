@@ -17,7 +17,7 @@ export default function PemasukanShow({ item, role = 'bendahara' }) {
                             </svg>
                         </Link>
                         <div>
-                            <span className="text-xs font-semibold text-emerald-600 block uppercase">Rincian Pos Pemasukan (React)</span>
+                            <span className="text-xs font-semibold text-emerald-600 block uppercase">Rincian Pos Pemasukan</span>
                             <h1 className="text-2xl font-bold text-slate-900">{item?.judul}</h1>
                         </div>
                     </div>
