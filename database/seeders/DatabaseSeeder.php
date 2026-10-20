@@ -14,18 +14,19 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Data pengguna
         $admin = User::create([
-            'name' => 'Admin KasFlow',
-            'email' => 'admin@kasflow.test',
-            'password' => 'password',
-        ]);
+    'name' => 'Admin KasFlow',
+    'email' => 'admin@kasflow.test',
+    'password' => 'password',
+    'role' => 'bendahara',
+]);
 
-        $anggota = User::create([
-            'name' => 'Preisi',
-            'email' => 'preisi@kasflow.test',
-            'password' => 'password',
-        ]);
+$anggota = User::create([
+    'name' => 'Preisi',
+    'email' => 'preisi@kasflow.test',
+    'password' => 'password',
+    'role' => 'anggota',
+]);
 
         // Data kategori transaksi
         $iuran = KategoriTransaksi::create([
